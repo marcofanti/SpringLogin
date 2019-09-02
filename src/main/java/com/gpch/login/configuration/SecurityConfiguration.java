@@ -11,6 +11,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import com.gpch.login.handler.SimpleAuthenticationSuccessHandler;
+
 import javax.sql.DataSource;
 
 @Configuration
@@ -29,6 +31,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Value("${spring.queries.roles-query}")
     private String rolesQuery;
 
+    @Autowired
+	private SimpleAuthenticationSuccessHandler successHandler;
+	
     @Override
     protected void configure(AuthenticationManagerBuilder auth)
             throws Exception {
@@ -42,6 +47,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+//                .defaultSuccessUrl("/admin/home")
+//                .defaultSuccessUrl("http://localhost:9999/test")
 
         http.
                 authorizeRequests()
@@ -54,6 +61,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .defaultSuccessUrl("/admin/home")
                 .usernameParameter("email")
                 .passwordParameter("password")
+                .and().formLogin().successHandler(successHandler)
                 .and().logout()
                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
                 .logoutSuccessUrl("/").and().exceptionHandling()
