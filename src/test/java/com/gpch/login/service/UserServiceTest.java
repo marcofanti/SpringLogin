@@ -14,17 +14,47 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.io.UnsupportedEncodingException;
+
 public class UserServiceTest {
+    public User user;
+    public UserService userServiceUnderTest;
 
-    @Mock
-    private UserRepository mockUserRepository;
-    @Mock
-    private RoleRepository mockRoleRepository;
-    @Mock
-    private BCryptPasswordEncoder mockBCryptPasswordEncoder;
+    @Before
+    public void setUp() {
+        initMocks(this);
+        user = User.builder()
+                .id(1)
+                .name("Gustavo")
+                .lastName("Ponce")
+                .email("test@test.com")
+                .secret("HVG2XNTVMZ4H4NUZ")
+                .build();
+	}
+    
+    @Test
+    public void testFindUserByEmail() {
+    	String QRUrl = null;
+    	try {
+    		QRUrl = userServiceUnderTest.generateQRUrl(user);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        System.out.println("User " + user);
+        System.out.println("QRUrl " + QRUrl);
+    }
 
-    private UserService userServiceUnderTest;
-    private User user;
+/*
+    @Mock
+    public UserRepository mockUserRepository;
+    @Mock
+    public RoleRepository mockRoleRepository;
+    @Mock
+    public BCryptPasswordEncoder mockBCryptPasswordEncoder;
+
+    public UserService userServiceUnderTest;
+    public User user;
 
     @Before
     public void setUp() {
@@ -67,5 +97,5 @@ public class UserServiceTest {
 
         // Verify the results
         assertEquals(email, result.getEmail());
-    }
+    } */
 }

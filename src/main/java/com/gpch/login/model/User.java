@@ -39,6 +39,10 @@ public class User {
     private String lastName;
     @Column(name = "active")
     private int active;
+    @Column(name = "isUsing2FA")
+    private int isUsing2FA;
+    @Column(name = "secret")
+    private String secret;
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
