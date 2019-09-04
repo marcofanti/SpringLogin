@@ -1,8 +1,9 @@
 package com.gpch.login.handler;
 
 import java.io.IOException;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -11,12 +12,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
+import com.behaviosec.login.security.jwt.JwtTokenProvider;
 import com.behaviosec.login.utils.Utils;
 
 @Component
@@ -76,13 +77,19 @@ public class SimpleAuthenticationSuccessHandler implements AuthenticationSuccess
 			logger.info(parameters + " " + arg0.getParameter(parameters.toString()));
 		}
 		
+		List<String> roles = new ArrayList<String>();
+
+		JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
+		String token = jwtTokenProvider.createToken(userName, roles);
+		
+		logger.error("Token = " + token);
+		
 		utils.checkData(userName, userAgent, ip, timingData);
 		logger.info("\n\n");
 		logger.info("\nRedirection " + redirection);
-
 		try {
 			if (redirection != null && redirection.trim().length() > 0) {
-				redirectStrategy.sendRedirect(arg0, arg1, redirection);
+				redirectStrategy.sendRedirect(arg0, arg1, redirection + "?" + token);
 			} else {
 				redirectStrategy.sendRedirect(arg0, arg1, "/admin/home");
 			}
