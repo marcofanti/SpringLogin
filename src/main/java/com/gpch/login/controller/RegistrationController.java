@@ -28,28 +28,6 @@ public class RegistrationController {
         modelAndView.setViewName("registration");
         return modelAndView;
     }
-
-/*    
-    @RequestMapping(value = "/registrationConfirm", method = RequestMethod.GET)
-    public String confirmRegistration(@RequestParam("token") String token) {
-        String result = userService.validateVerificationToken(token);
-        if(result.equals("valid")) {
-            User user = userService.getUser(token);
-            if (user.isUsing2FA()) {
-            	String QRUrl = userService.generateQRUrl(user);
-            	System.out.println("QRUrl = " + QRUrl);
-                model.addAttribute("qr", QRUrl);
-                return "redirect:/qrcode.html?lang=" + locale.getLanguage();
-            }
-             
-            model.addAttribute(
-              "message", messages.getMessage("message.accountVerified", null, locale));
-            return "redirect:/login?lang=" + locale.getLanguage();
-        }
-    }
- 
-    */
-    
     
     @RequestMapping(value = "/registration", method = RequestMethod.POST)
     public ModelAndView createNewUser(@Valid User user, BindingResult bindingResult) {
