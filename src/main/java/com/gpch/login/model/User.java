@@ -2,7 +2,6 @@ package com.gpch.login.model;
 
 import org.hibernate.validator.constraints.Length;
 import javax.persistence.*;
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import java.util.Set;
 
@@ -13,16 +12,16 @@ public class User {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "user_id")
     private int id;
-    @Column(name = "email")
-    @Email(message = "*Please provide a valid Email")
-    @NotEmpty(message = "*Please provide an email")
-    private String email;
+    @Column(name = "username")
+    @Length(min = 2, message = "*Please provide a valid Username (2 characters)")
+    @NotEmpty(message = "*Please provide a Username")
+    private String username;
     @Column(name = "password")
-    @Length(min = 5, message = "*Your password must have at least 5 characters")
+    @Length(min = 8, message = "*Your password must have at least 8 characters")
     @NotEmpty(message = "*Please provide your password")
     private String password;
     @Column(name = "name")
-    @NotEmpty(message = "*Please provide your name")
+    @NotEmpty(message = "*Please provide your first name")
     private String name;
     @Column(name = "last_name")
     @NotEmpty(message = "*Please provide your last name")
@@ -33,6 +32,8 @@ public class User {
     private int isUsing2FA;
     @Column(name = "secret")
     private String secret;
+    @Column(name = "other")
+    private String other;
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
@@ -43,7 +44,7 @@ public class User {
         @java.lang.SuppressWarnings("all")
         private int id;
         @java.lang.SuppressWarnings("all")
-        private String email;
+        private String username;
         @java.lang.SuppressWarnings("all")
         private String password;
         @java.lang.SuppressWarnings("all")
@@ -56,6 +57,8 @@ public class User {
         private int isUsing2FA;
         @java.lang.SuppressWarnings("all")
         private String secret;
+        @java.lang.SuppressWarnings("all")
+        private String other;
         @java.lang.SuppressWarnings("all")
         private Set<Role> roles;
 
@@ -70,8 +73,8 @@ public class User {
         }
 
         @java.lang.SuppressWarnings("all")
-        public UserBuilder email(final String email) {
-            this.email = email;
+        public UserBuilder username(final String username) {
+            this.username = username;
             return this;
         }
 
@@ -112,6 +115,12 @@ public class User {
         }
 
         @java.lang.SuppressWarnings("all")
+        public UserBuilder other(final String other) {
+            this.other = other;
+            return this;
+        }
+
+        @java.lang.SuppressWarnings("all")
         public UserBuilder roles(final Set<Role> roles) {
             this.roles = roles;
             return this;
@@ -119,13 +128,16 @@ public class User {
 
         @java.lang.SuppressWarnings("all")
         public User build() {
-            return new User(id, email, password, name, lastName, active, isUsing2FA, secret, roles);
+            return new User(id, username, password, name, lastName, active, isUsing2FA, secret, other, roles);
         }
 
         @java.lang.Override
         @java.lang.SuppressWarnings("all")
         public java.lang.String toString() {
-            return "User.UserBuilder(id=" + this.id + ", email=" + this.email + ", password=" + this.password + ", name=" + this.name + ", lastName=" + this.lastName + ", active=" + this.active + ", isUsing2FA=" + this.isUsing2FA + ", secret=" + this.secret + ", roles=" + this.roles + ")";
+            return "User.UserBuilder(id=" + this.id + ", username=" + this.username + ", password=" + 
+            		this.password + ", name=" + this.name + ", lastName=" + this.lastName + ", active=" + 
+            		this.active + ", isUsing2FA=" + this.isUsing2FA + ", secret=" + this.secret + 
+            		", other=\" + this.other + \", roles=" + this.roles + ")";
         }
     }
 
@@ -140,8 +152,8 @@ public class User {
     }
 
     @java.lang.SuppressWarnings("all")
-    public String getEmail() {
-        return this.email;
+    public String getUsername() {
+        return this.username;
     }
 
     @java.lang.SuppressWarnings("all")
@@ -175,6 +187,11 @@ public class User {
     }
 
     @java.lang.SuppressWarnings("all")
+    public String getOther() {
+        return this.other;
+    }
+
+    @java.lang.SuppressWarnings("all")
     public Set<Role> getRoles() {
         return this.roles;
     }
@@ -185,8 +202,8 @@ public class User {
     }
 
     @java.lang.SuppressWarnings("all")
-    public void setEmail(final String email) {
-        this.email = email;
+    public void setusername(final String username) {
+        this.username = username;
     }
 
     @java.lang.SuppressWarnings("all")
@@ -220,6 +237,11 @@ public class User {
     }
 
     @java.lang.SuppressWarnings("all")
+    public void setOther(final String other) {
+        this.other = other;
+    }
+
+    @java.lang.SuppressWarnings("all")
     public void setRoles(final Set<Role> roles) {
         this.roles = roles;
     }
@@ -232,9 +254,9 @@ public class User {
         final User other = (User) o;
         if (!other.canEqual((java.lang.Object) this)) return false;
         if (this.getId() != other.getId()) return false;
-        final java.lang.Object this$email = this.getEmail();
-        final java.lang.Object other$email = other.getEmail();
-        if (this$email == null ? other$email != null : !this$email.equals(other$email)) return false;
+        final java.lang.Object this$username = this.getUsername();
+        final java.lang.Object other$username = other.getUsername();
+        if (this$username == null ? other$username != null : !this$username.equals(other$username)) return false;
         final java.lang.Object this$password = this.getPassword();
         final java.lang.Object other$password = other.getPassword();
         if (this$password == null ? other$password != null : !this$password.equals(other$password)) return false;
@@ -249,6 +271,9 @@ public class User {
         final java.lang.Object this$secret = this.getSecret();
         final java.lang.Object other$secret = other.getSecret();
         if (this$secret == null ? other$secret != null : !this$secret.equals(other$secret)) return false;
+        final java.lang.Object this$other = this.getOther();
+        final java.lang.Object other$other = other.getOther();
+        if (this$other == null ? other$other != null : !this$other.equals(other$other)) return false;
         final java.lang.Object this$roles = this.getRoles();
         final java.lang.Object other$roles = other.getRoles();
         if (this$roles == null ? other$roles != null : !this$roles.equals(other$roles)) return false;
@@ -266,8 +291,8 @@ public class User {
         final int PRIME = 59;
         int result = 1;
         result = result * PRIME + this.getId();
-        final java.lang.Object $email = this.getEmail();
-        result = result * PRIME + ($email == null ? 43 : $email.hashCode());
+        final java.lang.Object $username = this.getUsername();
+        result = result * PRIME + ($username == null ? 43 : $username.hashCode());
         final java.lang.Object $password = this.getPassword();
         result = result * PRIME + ($password == null ? 43 : $password.hashCode());
         final java.lang.Object $name = this.getName();
@@ -278,6 +303,8 @@ public class User {
         result = result * PRIME + this.getIsUsing2FA();
         final java.lang.Object $secret = this.getSecret();
         result = result * PRIME + ($secret == null ? 43 : $secret.hashCode());
+        final java.lang.Object $other = this.getOther();
+        result = result * PRIME + ($other == null ? 43 : $other.hashCode());
         final java.lang.Object $roles = this.getRoles();
         result = result * PRIME + ($roles == null ? 43 : $roles.hashCode());
         return result;
@@ -286,19 +313,24 @@ public class User {
     @java.lang.Override
     @java.lang.SuppressWarnings("all")
     public java.lang.String toString() {
-        return "User(id=" + this.getId() + ", email=" + this.getEmail() + ", password=" + this.getPassword() + ", name=" + this.getName() + ", lastName=" + this.getLastName() + ", active=" + this.getActive() + ", isUsing2FA=" + this.getIsUsing2FA() + ", secret=" + this.getSecret() + ", roles=" + this.getRoles() + ")";
+        return "User(id=" + this.getId() + ", username=" + this.getUsername() + ", password=" + this.getPassword() + 
+        		", name=" + this.getName() + ", lastName=" + this.getLastName() + ", active=" + this.getActive() + 
+        		", isUsing2FA=" + this.getIsUsing2FA() + ", secret=" + this.getSecret() + ", other=" + this.getOther() + 
+        		", roles=" + this.getRoles() + ")";
     }
 
     @java.lang.SuppressWarnings("all")
-    public User(final int id, final String email, final String password, final String name, final String lastName, final int active, final int isUsing2FA, final String secret, final Set<Role> roles) {
+    public User(final int id, final String username, final String password, final String name, final String lastName, 
+    		final int active, final int isUsing2FA, final String secret, final String other, final Set<Role> roles) {
         this.id = id;
-        this.email = email;
+        this.username = username;
         this.password = password;
         this.name = name;
         this.lastName = lastName;
         this.active = active;
         this.isUsing2FA = isUsing2FA;
         this.secret = secret;
+        this.other = other;
         this.roles = roles;
     }
 

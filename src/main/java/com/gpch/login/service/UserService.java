@@ -33,16 +33,16 @@ public class UserService {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
-    public User findUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public User findUserByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
     public static String generateQRUrl(User user) throws UnsupportedEncodingException {
     	
-    	String email = user.getEmail();
+    	String username = user.getUsername();
     	String secret = user.getSecret();
     	String QRUrl = QR_PREFIX + URLEncoder.encode(String.format("otpauth://totp/%s:%s?secret=%s&issuer=%s", APP_NAME, 
-        		email, secret, APP_NAME), "UTF-8");
+        		username, secret, APP_NAME), "UTF-8");
         return QRUrl;
     }
 

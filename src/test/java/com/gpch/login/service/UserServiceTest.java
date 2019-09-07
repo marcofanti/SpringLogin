@@ -27,13 +27,13 @@ public class UserServiceTest {
                 .id(1)
                 .name("Gustavo")
                 .lastName("Ponce")
-                .email("test@test.com")
+                .username("test@test.com")
                 .secret("HVG2XNTVMZ4H4NUZ")
                 .build();
 	}
     
     @Test
-    public void testFindUserByEmail() {
+    public void testFindUserByUsername() {
     	String QRUrl = null;
     	try {
     		QRUrl = userServiceUnderTest.generateQRUrl(user);

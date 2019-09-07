@@ -56,7 +56,7 @@ public class OTPController {
     public ModelAndView validateOTP(@ModelAttribute OTPModel otpModel) {
         ModelAndView modelAndView = new ModelAndView();
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.findUserByEmail(auth.getName());
+        User user = userService.findUserByUsername(auth.getName());
         modelAndView.addObject("successMessage", "User confirmed successfully");
         modelAndView.setViewName("admin/loginOTP");
 

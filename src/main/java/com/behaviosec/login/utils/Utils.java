@@ -41,7 +41,7 @@ public class Utils {
 		}
     }
     
-    public boolean checkData(String userName, String userAgent, String ip, String timingData) {
+    public String checkData(String userName, String userAgent, String ip, String timingData) {
     	try {
         boolean connectionToServer = behavioSecRESTClient.getHealthCheck();
         logger.warn("Checking health " + connectionToServer);
@@ -53,12 +53,7 @@ public class Utils {
             nameValuePairs.add(new BasicNameValuePair(Constants.TIMING, timingData));
         } else {
             logger.warn("Timing data is null");
-            // We check for flag, and we either return deny or success
-            if (true) { //) {
-                return false;
-            } else {
-                return true;
-            }
+            return("Timing data is null");
         }
 
 //		String userAgent="Mozilla/5.0 (iPad; CPU OS 5_1 like Mac OS X; en-us) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9B176 Safari/7534.48.3";
@@ -84,7 +79,7 @@ public class Utils {
 
      //       newSharedState.put(Constants.BEHAVIOSEC_REPORT, asList(bhsReport));
             //logger.warn("2 - newSharedState -> " + newSharedState);
-            return true;
+            return bhsReport.toString();
         } else if ( responseCode == 400 ) {
             logger.warn(TAG + " response 400  ");// + getResponseString(reportResponse));
         } else if ( responseCode == 403 ) {
@@ -98,10 +93,10 @@ public class Utils {
             logger.warn(TAG + " response " + responseCode);
         }
 
-    	return false;
+    	return "Error: " + responseCode;
     	} catch (IOException e) {
     		e.printStackTrace();
-    		return false;
+    		return "Error: " + e;
     	}
     }    
 }

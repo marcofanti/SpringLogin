@@ -12,9 +12,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import com.behaviosec.login.security.jwt.JwtAuthenticationEntryPoint;
-import com.behaviosec.login.security.jwt.JwtTokenAuthenticationFilter;
-import com.behaviosec.login.security.jwt.JwtTokenProvider;
+import com.behaviosec.login.filter.BehavioSecAuthenticationEntryPoint;
+import com.behaviosec.login.filter.BehavioSecAuthenticationFilter;
+import com.behaviosec.login.filter.BehavioSecAuthenticationFilter2;
 import com.gpch.login.handler.SimpleAuthenticationSuccessHandler;
 
 import javax.sql.DataSource;
@@ -22,8 +22,6 @@ import javax.sql.DataSource;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
-
-    private JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -53,11 +51,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        JwtTokenAuthenticationFilter customFilter = new JwtTokenAuthenticationFilter(jwtTokenProvider);
+    	BehavioSecAuthenticationFilter customFilter = new BehavioSecAuthenticationFilter();
+    	BehavioSecAuthenticationFilter2 customFilter2 = new BehavioSecAuthenticationFilter2();
+    /*	
         http.exceptionHandling()
-        .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+        .authenticationEntryPoint(new BehavioSecAuthenticationEntryPoint())
         .and()
-        .addFilterBefore(customFilter, UsernamePasswordAuthenticationFilter.class);
+        .addFilterBefore(customFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterAfter(customFilter2, UsernamePasswordAuthenticationFilter.class);
+        */
 
         http.authorizeRequests()
                 .antMatchers("/").permitAll()
@@ -69,7 +71,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authenticated().and().csrf().disable().formLogin()
                 .loginPage("/login").failureUrl("/login?error=true")
                 .defaultSuccessUrl("/admin/home")
-                .usernameParameter("email")
+                .usernameParameter("username")
                 .passwordParameter("password")
                 .and().formLogin().successHandler(successHandler)
                 .and().logout()
