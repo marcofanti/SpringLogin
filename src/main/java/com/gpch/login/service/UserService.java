@@ -57,4 +57,10 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public User updateUser(User user, String other) {
+    	user.setOther(other);
+        return userRepository.save(user);
+    }
+
+
 }

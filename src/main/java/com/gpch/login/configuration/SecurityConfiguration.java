@@ -41,8 +41,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder auth)
             throws Exception {
-        auth.
-                jdbcAuthentication()
+        auth.jdbcAuthentication()
                 .usersByUsernameQuery(usersQuery)
                 .authoritiesByUsernameQuery(rolesQuery)
                 .dataSource(dataSource)
@@ -52,14 +51,14 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
     	BehavioSecAuthenticationFilter customFilter = new BehavioSecAuthenticationFilter();
-    	BehavioSecAuthenticationFilter2 customFilter2 = new BehavioSecAuthenticationFilter2();
-    /*	
+  //  	BehavioSecAuthenticationFilter2 customFilter2 = new BehavioSecAuthenticationFilter2();
+    	
         http.exceptionHandling()
         .authenticationEntryPoint(new BehavioSecAuthenticationEntryPoint())
         .and()
-        .addFilterBefore(customFilter, UsernamePasswordAuthenticationFilter.class)
-        .addFilterAfter(customFilter2, UsernamePasswordAuthenticationFilter.class);
-        */
+        .addFilterBefore(customFilter, UsernamePasswordAuthenticationFilter.class);
+//        .addFilterAfter(customFilter2, UsernamePasswordAuthenticationFilter.class);
+       
 
         http.authorizeRequests()
                 .antMatchers("/").permitAll()

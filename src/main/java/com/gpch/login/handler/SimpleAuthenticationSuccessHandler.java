@@ -91,8 +91,8 @@ public class SimpleAuthenticationSuccessHandler implements AuthenticationSuccess
 		
         User user = userService.findUserByUsername(userName);
         
-        user.setOther(result);
-        userService.saveUser(user);
+//        user.setOther(result);
+        userService.updateUser(user, result);
 
 		logger.info("\n\n");
 		logger.info("\nRedirection " + redirection);
