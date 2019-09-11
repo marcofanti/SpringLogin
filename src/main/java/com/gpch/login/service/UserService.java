@@ -48,6 +48,7 @@ public class UserService {
 
 
     public User saveUser(User user) {
+    	System.out.println(":" + user.getPassword() + " ********************* " + bCryptPasswordEncoder.encode(user.getPassword()));
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user.setActive(1);
         user.setSecret(Base32.random());

@@ -20,10 +20,10 @@
 
     <img th:src="@{/images/login.jpg}" class="img-responsive center-block" width="300" height="300" alt="Logo"/>
     <form th:action="@{/admin/loginOTP}" th:object="${OTPModel}" method="POST" class="form-signin">
-        <h3 class="form-signin-heading" th:text="Welcome"></h3>
+        <h3 class="form-signin-heading" th:text="${message}"></h3>
         <br/>
 
-        <input type="password" th:placeholder="#{label.form.loginPass}"
+        <input type="password" th:placeholder="${googleauth}"
                th:field="*{otpValue}" class="form-control"/> <br/>
 
         <div align="center" th:if="${param.error}">

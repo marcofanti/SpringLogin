@@ -24,7 +24,7 @@ import com.gpch.login.service.UserService;
 
 @Component
 public class SimpleAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
-	private static Utils utils = new Utils();
+	private static Utils utils = new Utils("http://behaviosense:8080/");
 	private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 	private static final String TAG = SimpleAuthenticationSuccessHandler.class.getName();
     private final Logger logger = LoggerFactory.getLogger(TAG);
@@ -90,14 +90,23 @@ public class SimpleAuthenticationSuccessHandler implements AuthenticationSuccess
 		String result = utils.checkData(userName, userAgent, ip, timingData);
 		
         User user = userService.findUserByUsername(userName);
+        boolean trained = true;
         
+        if (result != null && result.indexOf("Trained : false") > 10) {
+        	trained = false;
+        }
 //        user.setOther(result);
         userService.updateUser(user, result);
 
 		logger.info("\n\n");
 		logger.info("\nRedirection " + redirection);
 		try {
-			redirectStrategy.sendRedirect(arg0, arg1, "/admin/home");
+			if (!trained && !user.getUsername().startsWith("tr")) {
+				redirectStrategy.sendRedirect(arg0, arg1, "/admin/home");
+				//redirectStrategy.sendRedirect(arg0, arg1, "/admin/loginOTP");				
+			} else {
+				redirectStrategy.sendRedirect(arg0, arg1, "/admin/home");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -27,8 +27,13 @@ public class Utils {
 	private static final String TAG = Utils.class.getName();
     private final Logger logger = LoggerFactory.getLogger(TAG);
     
+    public Utils(String URL) {
+    	logger.info("Setting behaviosense URL to " + URL);
+    	this.behavioSecRESTClient = new BehavioSecRESTClient(URL); 
+    }
+    
     public Utils() {
-    	this.behavioSecRESTClient = new BehavioSecRESTClient("http://192.168.7.184:8080/"); 
+    	this.behavioSecRESTClient = new BehavioSecRESTClient("http://behaviosense:8080/"); 
     }
 
     public String decode(String value) {
