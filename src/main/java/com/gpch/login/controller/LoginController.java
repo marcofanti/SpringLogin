@@ -45,7 +45,9 @@ public class LoginController {
         	OTPModel otp = new OTPModel();
 	        modelAndView.addObject("googleauth", "OTP (Google Authenticator)");
 	        modelAndView.addObject("message", "Your score is too low, or you are in training -\n\n" + user.getName() + " " + user.getLastName() + 
-	        		" (" + user.getUsername() + ")" + "\n\nThis is your BehavioSec score:\n\nEnter your code:" + result);
+	        		" (" + user.getUsername() + ")");
+	        modelAndView.addObject("message2", "This is your BehavioSec score - " + result);
+	        modelAndView.addObject("message3", "Enter your code to continue login:");
 	        modelAndView.addObject("OTPModel", otp);
 	        modelAndView.setViewName("admin/loginOTP");        
         } else {
