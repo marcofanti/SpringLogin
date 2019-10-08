@@ -1,8 +1,10 @@
-package com.gpch.login.service;
+package com.behaviosec.service;
 
-import com.gpch.login.model.User;
-import com.gpch.login.repository.RoleRepository;
-import com.gpch.login.repository.UserRepository;
+import com.behaviosec.model.User;
+import com.behaviosec.repository.RoleRepository;
+import com.behaviosec.repository.UserRepository;
+import com.behaviosec.service.UserService;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
