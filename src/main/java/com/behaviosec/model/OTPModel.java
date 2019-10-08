@@ -1,13 +1,10 @@
-package com.gpch.login.model;
+package com.behaviosec.model;
 
+import lombok.Data;
+
+@Data
 public class OTPModel {
 	String otpValue;
-
-	public String getOtpValue() {
-		return otpValue;
-	}
-
-	public void setOtpValue(String otpValue) {
-		this.otpValue = otpValue;
-	}
+	String other;
+	String type;
 }

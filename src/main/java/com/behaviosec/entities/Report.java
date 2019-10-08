@@ -1,9 +1,11 @@
-package com.behaviosec.tree.restclient;
+package com.behaviosec.entities;
 
+import com.behaviosec.config.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class BehavioSecReport {
+public class Report {
 
     private boolean isBot = false;
     private boolean isTrained = false;
@@ -28,11 +30,21 @@ public class BehavioSecReport {
     private String startDate= "";
     private String endDate = "";
 
+    public String getSessionid() {
+        return sessionid;
+    }
+
+    public void setSessionid(String sessionid) {
+        this.sessionid = sessionid;
+    }
+
+    private String sessionid = "";
+
 
     /**
      * data representation constructor
      */
-    public BehavioSecReport() { }
+    public Report() { }
 
     /**
      * auto generated setters and getters
@@ -45,7 +57,7 @@ public class BehavioSecReport {
     public void setRemoteAccess(boolean remoteAccess) {
         isRemoteAccess = remoteAccess;
     }
-    public boolean isIsbot() {
+    public boolean isBot() {
         return isBot;
     }
 
@@ -150,7 +162,7 @@ public class BehavioSecReport {
     }
 
     public double getScore() {
-        return score *100;
+        return score * Constants.SCORE_MULTIPLIER;
     }
 
     public void setScore(double score) {
@@ -158,7 +170,7 @@ public class BehavioSecReport {
     }
 
     public double getRisk() {
-        return this.risk *100;
+        return this.risk * Constants.SCORE_MULTIPLIER;
     }
 
     public void setRisk(double risk) {
@@ -166,7 +178,7 @@ public class BehavioSecReport {
     }
 
     public double getConfidence() {
-        return confidence *100;
+        return confidence * Constants.SCORE_MULTIPLIER;
     }
 
     public void setConfidence(double confidence) {
@@ -174,7 +186,7 @@ public class BehavioSecReport {
     }
 
     public double getUiScore() {
-        return uiScore * 100;
+        return uiScore * Constants.SCORE_MULTIPLIER;
     }
 
     public void setUiScore(double uiScore) {
@@ -182,7 +194,7 @@ public class BehavioSecReport {
     }
 
     public double getUiConfidence() {
-        return uiConfidence *100;
+        return uiConfidence * Constants.SCORE_MULTIPLIER;
     }
 
     public void setUiConfidence(double uiConfidence) {
@@ -206,7 +218,7 @@ public class BehavioSecReport {
     }
 
     public String getEndDate() {
-        return endDate;
+        return this.endDate;
     }
 
     public void setEndDate(String endDate) {
@@ -217,13 +229,12 @@ public class BehavioSecReport {
     @Override
     public String toString(){
         return  "\nUser : " + getUserid() + "\n"+
+                "SessionID : " + getSessionid() + "\n"+
                 "Score : " + getScore() + "\n"+
                 "Confidence : " + getConfidence() + "\n"+
                 "Risk : " + getRisk() + "\n"+
                 "Trained : " + isTrained() + "\n"+
-                "Bot : " + isIsbot() + "\n"+
+                "Bot : " + isBot() + "\n"+
                 "";
     }
-
-
 }

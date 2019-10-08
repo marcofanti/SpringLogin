@@ -1,9 +1,14 @@
-package com.gpch.login.handler;
+package com.behaviosec.handler;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -12,22 +17,36 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import com.behaviosec.login.utils.Utils;
-import com.gpch.login.model.User;
-import com.gpch.login.service.UserService;
+import com.behaviosec.config.AppServiceConfig;
+import com.behaviosec.config.BehavioSecException;
+import com.behaviosec.config.Constants;
+import com.behaviosec.entities.ReportRequest;
+import com.behaviosec.entities.Response;
+import com.behaviosec.model.User;
+import com.behaviosec.service.UserService;
+import com.behaviosec.utils.Helper;
+
+import lombok.NonNull;
+
+import com.behaviosec.config.Constants;
 
 @Component
 public class SimpleAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
-	private static Utils utils = new Utils("http://behaviosense:8080/");
+	@Value( "${behaviosec.behaviosecurl}" )
+	@NonNull public String behaviosecurl;
+	@Value( "${behaviosec.tenantId}" )
+	public String tenantId;
+
 	private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 	private static final String TAG = SimpleAuthenticationSuccessHandler.class.getName();
-    private final Logger logger = LoggerFactory.getLogger(TAG);
+    private final Logger log = LoggerFactory.getLogger(TAG);
     
     @Autowired
     private UserService userService;
@@ -37,16 +56,9 @@ public class SimpleAuthenticationSuccessHandler implements AuthenticationSuccess
 	public void onAuthenticationSuccess(HttpServletRequest arg0, HttpServletResponse arg1,
 			Authentication authentication) throws IOException, ServletException {
 
-		String redirection = "";
-		
-		System.out.println("\nAttributes\n");
+		String redirection = "/home/homepage";
+	
 		Iterator <String> itr = arg0.getAttributeNames().asIterator();
-
-		while (itr.hasNext()) {
-			Object attribute = itr.next();
-			System.out.println(attribute + " " + arg0.getAttribute(attribute.toString()));
-		}
-		System.out.println("\nHeaders\n");
 
 		itr = arg0.getHeaderNames().asIterator();
 
@@ -60,13 +72,13 @@ public class SimpleAuthenticationSuccessHandler implements AuthenticationSuccess
 				userAgent = headerValue;
 			}
 		}
-		System.out.println("\nParameters\n");
 		
 		itr = arg0.getParameterNames().asIterator();
 		
 		String timingData = "";
 		String userName = "";
-		String ip = "1.1.1.1";
+		String clientIp = Helper.getClientIpAddress(arg0);
+		
 		while (itr.hasNext()) {
 			Object parameters = itr.next();
 			if (parameters.equals("bdata") || parameters.equals("other")) {
@@ -74,7 +86,7 @@ public class SimpleAuthenticationSuccessHandler implements AuthenticationSuccess
 			} else if (parameters.equals("username")) {
 				userName = arg0.getParameter(parameters.toString());
 			} 
-			logger.info(parameters + " " + arg0.getParameter(parameters.toString()));
+			log.info(parameters + " " + arg0.getParameter(parameters.toString()));
 		}
 		
         if (timingData != null && timingData.trim().length() > 0) {
@@ -83,35 +95,90 @@ public class SimpleAuthenticationSuccessHandler implements AuthenticationSuccess
         		userAgent = timingData.substring(0, indexOf);
         		timingData = timingData.substring(indexOf + 2);
         	}
+
+			Response r = getResponse(behaviosecurl, tenantId, 
+					clientIp, userAgent, userName, timingData, log);
+			
+	        User user = userService.findUserByUsername(userName);
+	        
+	        if(r.hasReport()){
+	        	String report = r.getReponseString();
+	        	userService.updateUser(user, report);
+	        }
+	
         }
 
-		List<String> roles = new ArrayList<String>();
-		
-		String result = utils.checkData(userName, userAgent, ip, timingData);
-		
-        User user = userService.findUserByUsername(userName);
-        boolean trained = true;
-        
-        if (result != null && result.indexOf("Trained : false") > 10) {
-        	trained = false;
-        }
-//        user.setOther(result);
-        userService.updateUser(user, result);
-
-		logger.info("\n\n");
-		logger.info("\nRedirection " + redirection);
 		try {
-			if (!trained && !user.getUsername().startsWith("tr")) {
-				redirectStrategy.sendRedirect(arg0, arg1, "/admin/home");
-				//redirectStrategy.sendRedirect(arg0, arg1, "/admin/loginOTP");				
-			} else {
-				redirectStrategy.sendRedirect(arg0, arg1, "/admin/home");
-			}
+			//if (!trained && !user.getUsername().startsWith("tr")) {
+			//	redirectStrategy.sendRedirect(arg0, arg1, "/admin/home");
+			//	//redirectStrategy.sendRedirect(arg0, arg1, "/admin/loginOTP");				
+			//} else {
+			log.info("Redirection " + redirection);		
+			redirectStrategy.sendRedirect(arg0, arg1, redirection);
+			//}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
 		
 	}
+	
+	public static Response getResponse(String url, String tenantID, String clientIp, String agent, String userName, String bdata, Logger log) {
+        Response r = null;
+		com.behaviosec.client.ClientConfiguration clientConfig =
+                new com.behaviosec.client.ClientConfiguration(
+                        url,
+                        tenantID);
+        com.behaviosec.client.Client client = new com.behaviosec.client.Client(clientConfig);
+        ReportRequest reportRequest = new ReportRequest();
+        reportRequest.setUserIp(clientIp);
+        reportRequest.setSessionId(UUID.randomUUID().toString());
+        reportRequest.setUserAgent(agent);
+        reportRequest.setUsername(userName);
+        reportRequest.setTimingData(bdata);
+        reportRequest.setOperatorFlags(Constants.FINALIZE_DIRECTLY);
+	    log.info("Calling checkdata " + userName + " " + agent + " " + bdata.substring(0, 20) + "...");
+        try {
+            r = client.getReport(reportRequest);
+        } catch (BehavioSecException e) {
+            e.printStackTrace();
+        }
+        return r;
+	}
+
+    public void addToDB(String dbURL, String dbUser, String dbPassword, String report, String user) {
+    	Connection con = null;
+    	dbURL = dbURL + "&user=" + dbUser + "&password=" + dbPassword;
+    	PreparedStatement stmt = null;
+		try {
+			log.debug("Before connection");
+			con = DriverManager.getConnection(dbURL);
+			log.info("Before PreparedStatement");
+			stmt = con.prepareStatement(
+					"update behaviosecproxyless.user set other=? where username=?");
+			stmt.setString(2, user);
+			stmt.setString(1, report);
+			stmt.execute();
+			log.info("Updated user " + user + " " + report);
+			con.close();
+		} catch (Exception e) {
+			log.error(e.toString());
+		} finally {
+			if (con != null) {
+				try {
+					con.close();
+				} catch (SQLException sqlEx) { } // ignore
+
+				con = null;
+			}
+			if (stmt != null) {
+				try {
+					stmt.close();
+				} catch (SQLException sqlEx) { } // ignore
+				stmt = null;
+			}
+		}
+    }
+    
 
 }

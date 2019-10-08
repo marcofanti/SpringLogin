@@ -1,4 +1,4 @@
-package com.gpch.login.model;
+package com.behaviosec.model;
 
 import org.hibernate.validator.constraints.Length;
 import javax.persistence.*;

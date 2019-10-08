@@ -1,12 +1,12 @@
-package com.gpch.login.service;
+package com.behaviosec.service;
 
-import com.gpch.login.model.Role;
-import com.gpch.login.model.User;
-import com.gpch.login.repository.RoleRepository;
-import com.gpch.login.repository.UserRepository;
+import com.behaviosec.config.Constants;
+import com.behaviosec.model.Role;
+import com.behaviosec.model.User;
+import com.behaviosec.repository.RoleRepository;
+import com.behaviosec.repository.UserRepository;
 
 import org.jboss.aerogear.security.otp.api.Base32;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,10 +21,8 @@ public class UserService {
     private UserRepository userRepository;
     private RoleRepository roleRepository;
     private BCryptPasswordEncoder bCryptPasswordEncoder;
-    public static final String APP_NAME = "BehavioSecRegistration";
-    public static final String QR_PREFIX = "https://chart.googleapis.com/chart?chs=200x200&chld=M%%7C0&cht=qr&chl=";
 
-    @Autowired
+    @org.springframework.beans.factory.annotation.Autowired(required=true)
     public UserService(UserRepository userRepository,
                        RoleRepository roleRepository,
                        BCryptPasswordEncoder bCryptPasswordEncoder) {
@@ -41,19 +39,18 @@ public class UserService {
     	
     	String username = user.getUsername();
     	String secret = user.getSecret();
-    	String QRUrl = QR_PREFIX + URLEncoder.encode(String.format("otpauth://totp/%s:%s?secret=%s&issuer=%s", APP_NAME, 
-        		username, secret, APP_NAME), "UTF-8");
+    	String QRUrl = Constants.QR_PREFIX + URLEncoder.encode(String.format("otpauth://totp/%s:%s?secret=%s&issuer=%s", Constants.APP_NAME, 
+        		username, secret, Constants.APP_NAME), "UTF-8");
         return QRUrl;
     }
 
 
     public User saveUser(User user) {
-    	System.out.println(":" + user.getPassword() + " ********************* " + bCryptPasswordEncoder.encode(user.getPassword()));
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user.setActive(1);
         user.setSecret(Base32.random());
         user.setIsUsing2FA(1);
-        Role userRole = roleRepository.findByRole("ADMIN");
+        Role userRole = roleRepository.findByRole("USER");
         user.setRoles(new HashSet<Role>(Arrays.asList(userRole)));
         return userRepository.save(user);
     }
@@ -62,6 +59,4 @@ public class UserService {
     	user.setOther(other);
         return userRepository.save(user);
     }
-
-
 }

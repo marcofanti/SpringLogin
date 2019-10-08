@@ -1,4 +1,4 @@
-package com.gpch.login.controller;
+package com.behaviosec.controller;
 
 import org.jboss.aerogear.security.otp.Totp;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,11 +9,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.gpch.login.model.OTPModel;
-import com.gpch.login.model.User;
-import com.gpch.login.service.UserService;
+import com.behaviosec.model.OTPModel;
+import com.behaviosec.model.User;
+import com.behaviosec.service.UserService;
 
 @Controller
 public class OTPController {
@@ -22,20 +23,20 @@ public class OTPController {
     private UserService userService;
 
 	/*
-    @RequestMapping(value={"/admin/loginOTP"}, method = RequestMethod.GET)
+    @RequestMapping(value={"/home/loginOTP"}, method = RequestMethod.GET)
     public ModelAndView loginOTP(){
         ModelAndView modelAndView = new ModelAndView();
-        modelAndView.setViewName("admin/loginOTP");
+        modelAndView.setViewName("home/loginOTP");
         return modelAndView;
     }
 
-    @RequestMapping(value = "/admin/loginOTP", method = RequestMethod.POST)
+    @RequestMapping(value = "/home/loginOTP", method = RequestMethod.POST)
     public ModelAndView validateOTP() {
         ModelAndView modelAndView = new ModelAndView();
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.findUserByEmail(auth.getName());
         modelAndView.addObject("successMessage", "User confirmed successfully");
-        modelAndView.setViewName("admin/loginOTP");
+        modelAndView.setViewName("home/loginOTP");
 
 
         return modelAndView;
@@ -45,7 +46,7 @@ public class OTPController {
 
 */
 /*
-    @GetMapping("/admin/loginOTP")
+    @GetMapping("/home/loginOTP")
     public ModelAndView loginOTP(Model model){
     	
     	model.addAttribute("OTPModel", new OTPModel());
@@ -54,12 +55,20 @@ public class OTPController {
         return modelAndView;
     }
 */
-    @PostMapping("/admin/loginOTP")
-    public ModelAndView validateOTP(@ModelAttribute OTPModel otpModel) {
+    @PostMapping("/home/loginOTP")
+    public ModelAndView validateOTP(@RequestHeader(value = "referer", required = false) final String referer, @ModelAttribute OTPModel otpModel) {
         ModelAndView modelAndView = new ModelAndView();
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.findUserByUsername(auth.getName());
-        String result = user.getOther();
+        
+        String type = otpModel.getType();
+        String result = null;
+        
+        user.getOther();
+        
+        if ("otp".equals(type)) {
+        	
+        }
         String secret = user.getSecret();
         
         boolean passed = false;
@@ -82,12 +91,12 @@ public class OTPController {
 	        		" (" + user.getUsername() + ")" + "\n\nThis is your BehavioSec score:\n\nEnter your code:" + result);
 	        modelAndView.addObject("OTPModel", otp);
 	        modelAndView.addObject("OTPModel", otp);
-	        modelAndView.setViewName("admin/loginOTP");        
+	        modelAndView.setViewName("home/loginOTP");        
         } else {
 	        modelAndView.addObject("userName", "Welcome " + user.getName() + " " + user.getLastName() + 
 	        		" (" + user.getUsername() + ")");
 	        modelAndView.addObject("adminMessage", "This is your BehavioSec score:<br><br>" + result);
-	        modelAndView.setViewName("admin/home");
+	        modelAndView.setViewName("home/homepage");
         }
         return modelAndView;
   
@@ -99,7 +108,7 @@ public class OTPController {
         
         
 //        modelAndView.addObject("successMessage", "User confirmed successfully");
-//        modelAndView.setViewName("admin/loginOTP");
+//        modelAndView.setViewName("home/loginOTP");
 
 
 //        return modelAndView;

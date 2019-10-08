@@ -1,4 +1,4 @@
-package com.gpch.login.model;
+package com.behaviosec.model;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;

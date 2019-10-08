@@ -1,4 +1,4 @@
-package com.gpch.login.model;
+package com.behaviosec.model;
 
 public class MessageModel {
 	private long id;

@@ -3,6 +3,7 @@ package com.behaviosec.login;
 import org.jboss.aerogear.security.otp.Totp;
 
 public class TestOTP {
+	/*
 	public static void main(String [] args) {
         String secret = "BRUQ72GT24BHWP4L";
         
@@ -25,5 +26,5 @@ public class TestOTP {
         }
 
 	}
-
+ */
 }
