@@ -1,57 +1,83 @@
-<!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Messages</title>
-    <link rel="stylesheet" type="text/css" th:href="@{/css/home.css}"/>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<title>Continuous authentication</title>
 </head>
 <body>
-<div class="container">
-    <form th:action="@{/admin/home}" method="get">
+<div th:replace="fragments/header"></div>
+ <form th:action="@{/home/homepage}" method="get">
         <button class="btn btn-md btn-warning btn-block" name="registration"
                 type="Submit">Home
         </button>
     </form>
-    
-<div class="container">
-    <div class="row">
-        <div class="col-md-6 col-md-offset-3">
-             <form autocomplete="off" action="#" th:action="@{/admin/message}"
-                  th:object="${message}" method="post" class="form-horizontal"
-                  role="form">
-                <h2>New Message</h2>
-                <div class="form-group">
-                    <div class="col-sm-9">
-                        <input type="text" th:field="*{id}" placeholder="Id"
-                               class="form-control"/>
-                    </div>
-                </div>
+    <div th:replace="fragments/menu"></div>
 
-                <div class="form-group">
-                    <div class="col-sm-9">
-                        <input type="text" th:field="*{content}"
-                               placeholder="Content" class="form-control"/>
-                    </div>
-                </div>
- 
-                <div class="form-group">
-                    <div class="col-sm-9">
-                        <button type="submit" class="btn btn-primary btn-block">Add message</button>
-                    </div>
-                </div>
-       			<input type="hidden" th:field="*{other}" class="hidden-primary"/> <br/>
-        		<script src="/js/collector.min.js"></script>
-            </form>
-        </div>
-    </div>
-</div>
- 
-    <form th:action="@{/logout}" method="get">
-        <button class="btn btn-md btn-danger btn-block" name="registration"
-                type="Submit">Logout
-        </button>
-    </form>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-6 col-md-offset-3">
+				<form autocomplete="off" action="#" th:action="@{/home/message}"
+					th:object="${message}" method="post" class="form-horizontal"
+					role="form">
+					<h2>New Message</h2>
+					<div class="form-group">
+						<div class="col-sm-9">
+							<input type="text" th:field="*{id}" placeholder="Id"
+								class="form-control" />
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div class="col-sm-9">
+							<input type="text" th:field="*{content}" placeholder="Content"
+								class="form-control" />
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div class="col-sm-9">
+							<button type="submit" class="btn btn-primary btn-block">Add
+								message</button>
+						</div>
+					</div>
+											<div class="report" >
+							<p th:utext="${adminMessage}"></p>
+							<ul>
+							<li th:utext="${score}"></li>
+							<li th:utext="${risk}"></li>
+							<li th:utext="${deviceChange}"></li>
+							<li th:utext="${ipChange}"></li>
+							<li th:utext="${bot}"></li>
+							<li th:utext="${replay}"></li>
+							<li th:utext="${remoteAccess}"></li>
+							</ul>
+						</div>
+					
+					<input type="hidden" id="other" name="other" class="hidden-primary"/>
+					<br />
+					<script src="/js/collector.min.js"></script>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-6 col-md-offset-3">
+				<div class="panel-group" style="margin-top: 40px">
+					<div class="panel panel-primary">
+						<div class="panel-body"></div>
+						<p class="home-message-text text-center"
+							th:utext="${adminMessage}"></p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<form th:action="@{/logout}" method="get">
+		<button class="btn btn-md btn-danger btn-block" name="registration"
+			type="Submit">Logout</button>
+	</form>
 </body>
 </html>

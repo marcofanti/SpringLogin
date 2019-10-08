@@ -6,10 +6,11 @@
 </head>
 <body>
 <div th:replace="fragments/header"></div>
-<form action="https://ping.example.com:9031/idp/startSSO.ping" method="get">
-              <input type="hidden" class="form-check-input" name="PartnerSpId" id="IdpExample" value="IdpExample" />
-     <button class="btn btn-md btn-warning btn-block" type="Submit">Go To BehavioSec Login Page</button>
-</form><div th:replace="fragments/menu"></div>
+<form th:action="@{/}" method="get">
+    <button class="btn btn-md btn-warning btn-block" type="Submit">Go To BehavioSec Login Page</button>
+</form>
+<div th:replace="fragments/menu"></div>
+
 <div class="container">
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
@@ -32,8 +33,8 @@
 							</ul>
 						</div>
 		            <div class="panel-body">
-		        <!--    <img th:src="${qrurl}"class="img-responsive center-block" width="200" height="200"
-		                     alt="QRUrl"/>  --> 
+		            <img th:src="${qrurl}"class="img-responsive center-block" width="200" height="200"
+		                     alt="QRUrl"/>
 		             </div>
 		            <p class="admin-message-text text-center" th:utext="${successMessage}"></p>
 		        </div>

@@ -1,1 +1,23 @@
-Success
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Goodbye</title>
+</head>
+<body>
+<div th:replace="fragments/header"></div>
+<form action="https://ping.example.com:9031/idp/startSSO.ping" method="get">
+              <input type="hidden" class="form-check-input" name="PartnerSpId" id="BehavioSecSPConnection" value="BehavioSecSPConnection" />
+     <button class="btn btn-md btn-warning btn-block" type="Submit">Go To BehavioSec Login Page</button>
+</form>
+<div th:replace="fragments/menu"></div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <h2>Logout successful</h2>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
