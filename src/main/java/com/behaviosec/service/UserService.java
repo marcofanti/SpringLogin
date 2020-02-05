@@ -38,17 +38,16 @@ public class UserService {
     public static String generateQRUrl(User user) throws UnsupportedEncodingException {
     	
     	String username = user.getUsername();
-    	String secret = user.getSecret();
+    	String googleOauthToken = user.getGoogleOauthToken();
     	String QRUrl = Constants.QR_PREFIX + URLEncoder.encode(String.format("otpauth://totp/%s:%s?secret=%s&issuer=%s", Constants.APP_NAME, 
-        		username, secret, Constants.APP_NAME), "UTF-8");
+        		username, googleOauthToken, Constants.APP_NAME), "UTF-8");
         return QRUrl;
     }
-
 
     public User saveUser(User user) {
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user.setActive(1);
-        user.setSecret(Base32.random());
+        user.setGoogleOauthToken(Base32.random());
         user.setIsUsing2FA(1);
         Role userRole = roleRepository.findByRole("USER");
         user.setRoles(new HashSet<Role>(Arrays.asList(userRole)));

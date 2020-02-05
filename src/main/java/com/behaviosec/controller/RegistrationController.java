@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.behaviosec.handler.SimpleAuthenticationSuccessHandler;
-import com.behaviosec.config.Constants;
 import com.behaviosec.entities.Report;
 import com.behaviosec.entities.Response;
 import com.behaviosec.model.Registration;
@@ -131,6 +130,8 @@ public class RegistrationController {
 	        	if (indexOf > 0) {
 	        		userAgent = bdata.substring(0, indexOf);
 	        		bdata = bdata.substring(indexOf + 2);
+	        	} else {
+	        		userAgent = request.getHeader("User-Agent");
 	        	}
 	        }
 			String timingData = bdata;

@@ -1,10 +1,17 @@
 package com.behaviosec.controller;
 
+import com.behaviosec.config.Constants;
 import com.behaviosec.entities.Report;
+import com.behaviosec.model.Configuration;
 import com.behaviosec.model.OTPModel;
+import com.behaviosec.model.Role;
 import com.behaviosec.model.User;
+import com.behaviosec.service.ConfigurationService;
+import com.behaviosec.service.LocalizedMessagesService;
 import com.behaviosec.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.NonNull;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -14,6 +21,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Set;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -43,6 +51,21 @@ public class LoginController {
 	private String dbPwd;
 	@Value( "${behaviosec.loginControllerRedirectionurl}" )
 	public String loginControllerRedirectionurl;
+	@Value( "${behaviosec.loginControllerRedirectionurlAdmin}" )
+	public String loginControllerRedirectionurlAdmin;
+	@Value( "${behaviosec.forgerockadmin}" )
+	public String forgerockAdmin;
+	@Value( "${behaviosec.forgerockadminpassword}" )
+	public String forgerockAdminPassword;
+	@Value( "${behaviosec.forgerockurl}" )
+	@NonNull public String forgerockurl;
+	@Value( "${behaviosec.standaloneurl}" )
+	@NonNull public String standaloneurl;
+	@Value( "${behaviosec.dashboardurl}" )
+	@NonNull public String dashboardUrl;
+	
+	@Autowired
+    private ConfigurationService configurationService;
 
 	private Log log = LogFactory.getLog(this.getClass());
 	private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -63,7 +86,7 @@ public class LoginController {
         modelAndView.setViewName("success");
         return modelAndView;
     }
-
+    
     @RequestMapping(value={"/saml/SSO"}, method = RequestMethod.POST)
     public RedirectView ssoPOST(HttpServletRequest request,
     	      HttpServletResponse response) throws IOException {
@@ -85,6 +108,11 @@ public class LoginController {
 		c.setPath("/");
 		c.setHttpOnly(true);
 		response.addCookie(c);
+    	Cookie cookie = new Cookie("saml", "ping");
+    	cookie.setPath("/");
+    	cookie.setHttpOnly(true);
+		response.addCookie(cookie);
+
 		InetAddress ip;
 		String hostname="";
 		try {
@@ -101,69 +129,131 @@ public class LoginController {
     }
 
     @RequestMapping(value="/home/homepage", method = RequestMethod.GET)
-    public ModelAndView home(@RequestHeader(value = "referer", required = false) final String referer){
+    public ModelAndView home(HttpServletRequest request, HttpServletResponse response, 
+    		@RequestHeader(value = "referer", required = false) final String referer){
     	
-    	log.debug(referer);
+    	Cookie [] cookies = request.getCookies();
+    	for (Cookie cookie : cookies) {
+    	     if ("saml".equals(cookie.getName())) {
+    	          String value = cookie.getValue();
+    	         //do something with the cookie's value.
+    	     }
+    	}
+    	
+    	log.debug("referer = " + referer);
     	
         ModelAndView modelAndView = new ModelAndView();
         
-        if (referer != null && referer.endsWith("/login")) {
-	        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-	        User user = userService.findUserByUsername(auth.getName());
-	        
-	        String result = user.getOther();
-			Report bhsReport = null;
-			try {
-				bhsReport = objectMapper.readValue(
-						result,
-						Report.class
-				);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-			modelAndView.addObject("userName", user.getName() + " " + user.getLastName() +
-		        		" (" + user.getUsername() + ")");
-			modelAndView.addObject("adminMessage", "<b>This is your BehavioSec report:</b><br>");
-			
+		String homePage = "home/homepage";
+
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		User user = userService.findUserByUsername(auth.getName());
+
+		String result = user.getOther();
+		Report bhsReport = null;
+		try {
+			bhsReport = objectMapper.readValue(result, Report.class);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		modelAndView.addObject("userName", user.getName() + " " + user.getLastName() + " (" + user.getUsername() + ")");
+		String message = LocalizedMessagesService.getMessage("message.behaviosec.login.report");
+		modelAndView.addObject("adminMessage", "<b>" + message + "</b><br>");
+
+		if (referer != null && (!referer.contains("9031") && !referer.contains("18080"))) {
+				
+				//referer.endsWith("19876/") || referer.endsWith("/login") || referer.endsWith("loginOTP")
+				//|| referer.endsWith("logout"))) {
+
 			if (bhsReport != null) {
 				int score = (int) bhsReport.getScore();
-				if (score < 60) {
-					modelAndView.addObject("score", "<b>Behavioral Score: </b>" + ((int) bhsReport.getScore()));
-					modelAndView.addObject("isTrained", "<b>Is Trained: </b>" + bhsReport.isTrained());
-			        modelAndView.addObject("googleauth", "OTP (Google Authenticator)");
-			        modelAndView.addObject("googleauth", "Please TYPE (don't cut and paste) your email");
-			        modelAndView.addObject("message", "Your score is too low");
+				int risk = (int) bhsReport.getRisk();
+				boolean isCopyOrPaste = bhsReport.isCopyOrPaste();
+				Configuration minimumLoginScoreConfiguration = configurationService
+						.findConfigurationByName(Constants.MINIMUM_LOGIN_SCORE);
+				Configuration maximumLoginRiskConfiguration = configurationService
+						.findConfigurationByName(Constants.MAXIMUM_LOGIN_RISK);
+				int minimumLoginScoreValue = Integer.parseInt(minimumLoginScoreConfiguration.getConfigurationValue());
+				int maximumLoginRiskValue = Integer.parseInt(maximumLoginRiskConfiguration.getConfigurationValue());
+				
+				if (!bhsReport.isTrained()) {
+					log.info("Not trained");
+					modelAndView = addReport(modelAndView, bhsReport, "home/loginOTP");
+					modelAndView.addObject("adminMessage", "Your profile is still in training");
 					OTPModel otpModel = new OTPModel();
 					otpModel.setType("otp");
 					modelAndView.addObject("OTPModel", otpModel);
-				    modelAndView.setViewName("home/loginOTP");	
-				} else if (!bhsReport.isTrained()) {
-					modelAndView.addObject("score", "<b>Behavioral Score: </b>" + ((int) bhsReport.getScore()));
-					modelAndView.addObject("isTrained", "<b>Is Trained: </b>" + bhsReport.isTrained());
-			        modelAndView.addObject("googleauth", "OTP (Google Authenticator)");
-			        modelAndView.addObject("message", "You are not trained yet");
+				} else if (isCopyOrPaste || score < minimumLoginScoreValue || risk > maximumLoginRiskValue) {
+					log.info("pocAnomaly " + isCopyOrPaste + " score " + score + " risk " + risk);
+					modelAndView.addObject("googleauth", "email address");
 					OTPModel otpModel = new OTPModel();
-					otpModel.setType("behaviosec");
+					otpModel.setType("otp");
+					if (isCopyOrPaste) {
+						log.info("We detected cut and paste, please type your email");
+						modelAndView.addObject("message", "We detected cut and paste, please type your email");
+//						modelAndView.addObject("message", "We detected cut and paste, please enter your Google Authenticator code");
+						modelAndView = addReport(modelAndView, bhsReport, "home/loginBehaviosec");
+						otpModel.setType("behaviosec");
+					} else if (score < minimumLoginScoreValue) {
+						log.info("Your score is to low, please type your email");
+//						modelAndView.addObject("message", "Your score is to low, please type your email");
+						modelAndView.addObject("message", "Your score is to low, please enter your Google Authenticator code");
+						modelAndView = addReport(modelAndView, bhsReport, "home/loginOTP");
+					} else if (risk > maximumLoginRiskValue) {
+						log.info("Your risk is too high, please type your email");
+						modelAndView.addObject("message", "Your score is to low, please enter your Google Authenticator code");
+						modelAndView = addReport(modelAndView, bhsReport, "home/loginOTP");
+//						modelAndView.addObject("message", "Your risk is too high, please type your email");
+					}
 					modelAndView.addObject("OTPModel", otpModel);
-				    modelAndView.setViewName("home/loginOTP");	
-				} else {				
-					modelAndView.addObject("score", "<b>Behavioral Score: </b>" + ((int) bhsReport.getScore()));
-					modelAndView.addObject("risk", "<b>Risk: </b>" + ((int) bhsReport.getRisk()));
-					modelAndView.addObject("deviceChange", "<b>Device Changed: </b>" + bhsReport.isDeviceChanged());
-					modelAndView.addObject("ipChange", "<b>Ip Changed: </b>" + bhsReport.isIpChanged());
-					modelAndView.addObject("bot", "<b>Bot: </b>" + bhsReport.isBot());
-					modelAndView.addObject("replay", "<b>Replay Attack: </b>" + bhsReport.isReplay());
-					modelAndView.addObject("remoteAccess", "<b>Remote Access: </b>" + bhsReport.isRemoteAccess());
-					modelAndView.addObject("isTrained", "<b>Is Trained: </b>" + bhsReport.isTrained());
-					modelAndView.setViewName("home/homepage");
+				} else {
+					modelAndView = addReport(modelAndView, bhsReport, homePage);
 				}
 			}
-	    } else {
-		    modelAndView.setViewName("home/homemenu");
-	    }
-        return modelAndView;
+		} else {
+			log.info("addReport" + bhsReport + " homepage " + homePage);
+			modelAndView = addReport(modelAndView, bhsReport, homePage);
+		}
+		return modelAndView;
     }
+    
+	private ModelAndView addReport(ModelAndView modelAndView, Report bhsReport, String viewName) {
+		String link = "<a href=\"" + dashboardUrl +
+				"BehavioSenseDashboard/usertimeline.jsp?userid="
+				+ bhsReport.getUserid() +
+				"&sessionid=" +bhsReport.getSessionid()+
+				"\">View on the dashboard</a>";
+
+		String dashboard = dashboardUrl +
+				"BehavioSenseDashboard/usertimeline.jsp?userid="
+				+ bhsReport.getUserid() +
+				"&sessionid=" +bhsReport.getSessionid();
+		log.error("Building OTP View: " + dashboard);
+
+		log.error("Dashboard url: " + dashboard);
+		log.error("isCopyorPaste: " + bhsReport.isCopyOrPaste());
+
+		modelAndView.addObject("dashboardUrl", dashboard);
+		modelAndView.addObject("userName", bhsReport.getUserid());
+		modelAndView.addObject("adminMessage", "<b>Behavioral Report: </b>" + link);
+		modelAndView.addObject("score", "<b>Behavioral Score: </b>" + ((int) bhsReport.getScore()));
+		modelAndView.addObject("risk", "<b>Risk: </b>" + ((int) bhsReport.getRisk()));
+		modelAndView.addObject("isTrained", "<b>Is Trained: </b>" + bhsReport.isTrained());
+
+		// RISK flags
+		modelAndView.addObject("copyPaste", "<b>Cut or Paste detected: </b>" + bhsReport.isCopyOrPaste());
+		modelAndView.addObject("deviceChange", "<b>Device Changed: </b>" + bhsReport.isDeviceChanged());
+		modelAndView.addObject("ipChange", "<b>Ip Changed: </b>" + bhsReport.isIpChanged());
+		modelAndView.addObject("bot", "<b>Bot: </b>" + bhsReport.isBot());
+		modelAndView.addObject("replay", "<b>Replay Attack: </b>" + bhsReport.isReplay());
+		modelAndView.addObject("remoteAccess", "<b>Remote Access: </b>" + bhsReport.isRemoteAccess());
+		modelAndView.addObject("isTrained", "<b>Is Trained: </b>" + bhsReport.isTrained());
+		
+		modelAndView.setViewName(viewName);
+
+		return modelAndView;
+	}
     
     private String getSecret(String userName) {    	
     	String secret = null;		
@@ -216,6 +306,5 @@ public class LoginController {
 			}
 		}
 		return secret;
-
     }
 }

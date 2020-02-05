@@ -54,12 +54,13 @@ public class User {
 	private int isUsing2FA;
 	@Column(name = "secret")
 	private String secret;
+	@Column(name = "google_oauth_token")
+	private String googleOauthToken;
 	@Column(name = "other", columnDefinition = "TEXT")
 	private String other;
 	@Column(name = "invitationKey")
 	@NotEmpty(message = "*Please provide an invitation Key")
 	private String invitationKey;
-
 	@ManyToMany(cascade = CascadeType.ALL)
 	@JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> roles;

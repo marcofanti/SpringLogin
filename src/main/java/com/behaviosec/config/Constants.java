@@ -24,6 +24,21 @@ public class Constants {
     public static final boolean ALLOW_DEVICE_CHANGE = true;
     public static final int ERROR_ID_POSITION = 1;
     public static final int ERROR_MESSAGE_POSITION = 2;
+    
+    public static final String MINIMUM_SSO_SCORE = "minimumssoscore";
+    public static final String MAXIMUM_SSO_RISK = "maximumssorisk";
+    
+    public static final String MINIMUM_LOGIN_SCORE = "minimumloginscore";
+    public static final String MAXIMUM_LOGIN_RISK = "maximumloginrisk";
+    
+    public static final String MINIMUM_STEP_UP_SCORE = "minimumstepupscore";
+    public static final String MAXIMUM_STEP_UP_RISK = "maximumstepuprisk";
+    
+    public static final String MINIMUM_FORM_SCORE = "minimumformscore";
+    public static final String MAXIMUM_FORM_RISK = "maximumformrisk";
+    
+    public static final String OTP = "otp";
+    public static final String BEHAVIOSEC = "behaviosec";
 
     public static final String APP_NAME = "BehavioSecRegistration";
     public static final String QR_PREFIX = "https://chart.googleapis.com/chart?chs=200x200&chld=M%%7C0&cht=qr&chl=";
